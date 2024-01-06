@@ -1,26 +1,25 @@
 import os
-import dotenv
-dotenv.load_dotenv()
-
 import finnhub
-import pandas as pd
+from ..utils.df_utils import to_pd_df
+
+key_scheme = 'FINNHUB_API_KEY'
+
 
 class FinnHub:
-    api_key = os.getenv('FINNHUB_API_KEY')
+    api_key = os.getenv(key_scheme)
     
     @classmethod
-    def get_client(cls):
-        return finnhub.Client(api_key=cls.api_key)
+    def get_client(cls, api_key=None):
+        return finnhub.Client(api_key=api_key or cls.api_key)
     
     @classmethod
-    def get_info_df(cls, info_kind, **kwargs):
+    def get_info_df(cls, info_kind="company_news", **kwargs):
         client = cls.get_client()
         info_func = cls.get_finnhub_method(client, info_kind)
         try:
             results = info_func(**kwargs)
             try: 
-                df = pd.DataFrame(results).dropna(how='all')
-                df.reset_index(drop=True, inplace=True)
+                df = to_pd_df(results)
                 return df
             except Exception as e:
                 raise ValueError(f"Error occured during converting {info_kind} to DataFrame: {e}")

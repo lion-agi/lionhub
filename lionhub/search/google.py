@@ -1,16 +1,18 @@
 import os
-import dotenv
-dotenv.load_dotenv()
-
 from typing import Any, Dict
 
 from lionagi import lcall
-from ..utils import get_url_response, get_url_content
+from ..utils.url_utils import get_url_response, get_url_content
+
+key_scheme = 'GOOGLE_API_KEY'
+engine_scheme = 'GOOGLE_CSE_ID'
+
+
 
 
 class GoogleSearch:
-    api_key = os.getenv('GOOGLE_API_KEY')
-    search_engine = os.getenv('GOOGLE_CSE_ID')
+    api_key = os.getenv(key_scheme)
+    search_engine = os.getenv(engine_scheme)
     search_url = (
         """
         https://www.googleapis.com/customsearch/v1?key={key}&cx={engine}&q={query}&start={start}
@@ -48,18 +50,26 @@ class GoogleSearch:
         content=True,
         num=5
         ):
-        
-        search_url = search_url or cls.search_url
-        url = search_url.format(
-            key=api_key or cls.api_key, 
-            engine=search_engine or cls.search_engine, 
-            query=query, 
-            start=start
-        )
+        url = cls._format_search_url(
+            url = search_url, query=query, api_key=api_key,
+            search_engine=search_engine, start=start
+            )
         response = get_url_response(url, timeout=timeout)
         response_dict = response.json()
         items = response_dict.get('items')[:num]
         if content:
             items = lcall(items, cls._get_search_item_field, dropna=True)
-        
         return items
+
+    @classmethod
+    def _format_search_url(cls, url, api_key, search_engine, query, start):
+        url = url or cls.search_url
+        url = url.format(
+            key=api_key or cls.api_key, 
+            engine=search_engine or cls.search_engine, 
+            query=query, 
+            start=start
+        )
+        return url
+
+
