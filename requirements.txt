@@ -6,3 +6,4 @@ yfinance == 0.2.35
 llama-index == 0.9.26
 pyautogen == 0.2.3
 finnhub-python == 2.4.19
+transformers == 4.36.1

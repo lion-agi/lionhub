@@ -17,7 +17,8 @@ install_requires = [
     "yfinance", 
     "llama-index",
     "pyautogen", 
-    "finnhub-python"
+    "finnhub-python", 
+    "transformers"
 ]
 
 
