@@ -1,1 +1,6 @@
-lionagi >= 0.0.111
+lionagi == 0.0.114
+pandas == 2.1.4
+requests == 2.31.0
+beautifulsoup4 == 4.12.2
+yfinance == 0.2.35
+llama-index == 0.9.26

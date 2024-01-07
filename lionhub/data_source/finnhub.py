@@ -1,16 +1,16 @@
 import os
-import finnhub
-from ..utils.df_utils import to_pd_df
-
-key_scheme = 'FINNHUB_API_KEY'
-
+finnhub_key_scheme = 'FINNHUB_API_KEY'
 
 class FinnHub:
-    api_key = os.getenv(key_scheme)
+    api_key = os.getenv(finnhub_key_scheme)
     
     @classmethod
     def get_client(cls, api_key=None):
-        return finnhub.Client(api_key=api_key or cls.api_key)
+        try: 
+            import finnhub
+            return finnhub.Client(api_key=api_key or cls.api_key)
+        except Exception as e:
+            raise ImportError(f"Error occured during importing finnhub: {e}")
     
     @classmethod
     def get_info_df(cls, info_kind="company_news", **kwargs):

@@ -1,18 +1,17 @@
 import os
-from typing import Any, Dict
-
+from typing import Dict, List, Any, Dict
 from lionagi import lcall
-from ..utils.url_utils import get_url_response, get_url_content
+from ..utils import get_url_content, get_url_response
 
-key_scheme = 'GOOGLE_API_KEY'
-engine_scheme = 'GOOGLE_CSE_ID'
+google_key_scheme = 'GOOGLE_API_KEY'
+google_engine_scheme = 'GOOGLE_CSE_ID'
 
-
-
+google_api_key = os.getenv(google_key_scheme)
+google_engine = os.getenv(google_engine_scheme)
 
 class GoogleSearch:
-    api_key = os.getenv(key_scheme)
-    search_engine = os.getenv(engine_scheme)
+    api_key = google_api_key
+    search_engine = google_engine
     search_url = (
         """
         https://www.googleapis.com/customsearch/v1?key={key}&cx={engine}&q={query}&start={start}
@@ -35,11 +34,20 @@ class GoogleSearch:
             "long_description": long_description,
             "content": get_url_content(url)
         }
-    
-    # return as a list of dic
-    # get the top num result from a google search with options of getting the search url content
+
     @classmethod
-    def search_google(
+    def _format_search_url(cls, url, api_key, search_engine, query, start):
+        url = url or cls.search_url
+        url = url.format(
+            key=api_key or cls.api_key, 
+            engine=search_engine or cls.search_engine, 
+            query=query, 
+            start=start
+        )
+        return url
+    
+    @classmethod
+    def search(
         cls, 
         query: str =None, 
         search_url = None,
@@ -62,14 +70,22 @@ class GoogleSearch:
         return items
 
     @classmethod
-    def _format_search_url(cls, url, api_key, search_engine, query, start):
-        url = url or cls.search_url
-        url = url.format(
-            key=api_key or cls.api_key, 
-            engine=search_engine or cls.search_engine, 
-            query=query, 
-            start=start
-        )
-        return url
+    def create_agent_engine(cls):
+        try:
+            from llama_index.agent import OpenAIAgent
+            from llama_index.tools.tool_spec.load_and_search.base import LoadAndSearchToolSpec
+            from llama_hub.tools.google_search.base import GoogleSearchToolSpec
 
+            google_spec = GoogleSearchToolSpec(key=cls.api_key, engine=cls.engine_id)
 
+            # Wrap the google search tool as it returns large payloads
+            tools = LoadAndSearchToolSpec.from_defaults(
+                google_spec.to_tool_list()[0],
+            ).to_tool_list()
+
+            # Create the Agent with our tools
+            agent = OpenAIAgent.from_tools(tools, verbose=True)
+            return agent.achat
+        
+        except Exception as e:
+            raise ImportError(f"Error in importing OpenAIAgent from llama_index: {e}")

@@ -10,12 +10,17 @@ with open(os.path.join(here, "lionhub/version.py")) as fp:
 __version__ = version["__version__"]
 
 install_requires = [
-    "lionagi"
+    "lionagi", 
+    "pandas", 
+    "requests",
+    "beautifulsoup4", 
+    "yfinance", 
+    "llama-index"
 ]
 
 
 setuptools.setup(
-    name="lionagi",
+    name="lionhub",
     version=__version__,
     author="HaiyangLi",
     author_email="ocean@lionagi.ai",
