@@ -1,4 +1,7 @@
 import os
+from ..utils.df_utils import to_pd_df
+
+
 finnhub_key_scheme = 'FINNHUB_API_KEY'
 
 class FinnHub:

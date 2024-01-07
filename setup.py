@@ -16,7 +16,8 @@ install_requires = [
     "beautifulsoup4", 
     "yfinance", 
     "llama-index",
-    "pyautogen"
+    "pyautogen", 
+    "finnhub-python"
 ]
 
 
