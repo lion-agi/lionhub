@@ -1,4 +1,4 @@
-def SmallToBig_engine(textnodes):
+def small2big_engine(textnodes):
     try:
         from llama_index.llama_pack import download_llama_pack
         

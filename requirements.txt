@@ -4,3 +4,4 @@ requests == 2.31.0
 beautifulsoup4 == 4.12.2
 yfinance == 0.2.35
 llama-index == 0.9.26
+pyautogen == 0.2.3

@@ -15,7 +15,8 @@ install_requires = [
     "requests",
     "beautifulsoup4", 
     "yfinance", 
-    "llama-index"
+    "llama-index",
+    "pyautogen"
 ]
 
 

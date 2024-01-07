@@ -2,16 +2,6 @@ from typing import Dict, Union
 from IPython import get_ipython
 import autogen
 
-config_list = autogen.config_list_from_json(
-    "OAI_CONFIG_LIST",
-    filter_dict={
-        "model": [
-            "gpt-4", "gpt-4-0314", "gpt4", "gpt-4-32k", 
-            "gpt-4-32k-0314", "gpt-4-32k-v0314", "gpt-4-1106-preview"
-            ],
-    },
-)
-
 
 class IPythonUserProxyAgent(autogen.UserProxyAgent):
     
@@ -38,14 +28,22 @@ class IPythonUserProxyAgent(autogen.UserProxyAgent):
         return exitcode, log, None
 
 
-def get_autogen_assistant(llm_config1=None, code_execution_config=None, kernal='python'):
+def get_autogen_assistant(
+    llm_config1=None, 
+    code_execution_config=None, 
+    kernal='python', 
+    config_list=None, 
+    max_consecutive_auto_reply=15, 
+    temperature=0, 
+    cache_seed=42
+):
 
     assistant = autogen.AssistantAgent(
         name="assistant",
         llm_config= llm_config1 or {
-            "cache_seed": 42, 
+            "cache_seed": cache_seed, 
             "config_list": config_list, 
-            "temperature": 0, 
+            "temperature": temperature, 
         },
     )
     
@@ -53,33 +51,20 @@ def get_autogen_assistant(llm_config1=None, code_execution_config=None, kernal='
         user_proxy = autogen.UserProxyAgent(
             name="user_proxy",
             human_input_mode="NEVER",
-            max_consecutive_auto_reply=10,
+            max_consecutive_auto_reply=max_consecutive_auto_reply,
             is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
             code_execution_config=code_execution_config or {
                 "work_dir": "coding",
                 "use_docker": False,  
             },
         )
-        return assistant, user_proxy
+        return user_proxy, assistant
 
     elif kernal == "ipython":
         user_proxy = IPythonUserProxyAgent(
             "ipython_user_proxy",
             human_input_mode="NEVER",
-            max_consecutive_auto_reply=10,
+            max_consecutive_auto_reply=max_consecutive_auto_reply,
             is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE") or x.get("content", "").rstrip().endswith('"TERMINATE".'),
         )
-        return assistant, user_proxy
-
-
-def auto_coder(task, llm_config1=None, code_execution_config=None, kernal="python"):
-    assistant, user_proxy = get_autogen_assistant(
-        llm_config1=llm_config1, code_execution_config=code_execution_config, kernal=kernal
-    )
-
-    user_proxy.initiate_chat(
-        assistant,
-        message=f"""{task}""",
-    )
-    
-    return user_proxy.chat_messages
+        return user_proxy, assistant

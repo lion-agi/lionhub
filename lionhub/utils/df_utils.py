@@ -19,7 +19,7 @@ def pd_row_to_node(row: pd.Series):
 
 def expand_df_datetime(df: pd.DataFrame) -> pd.DataFrame:
     df_expanded = df.copy()
-    df_expanded['datetime'] = df_expanded['datetime'].apply(lambda x: datetime.fromtimestamp(x))
+    df_expanded['datetime'] = df_expanded['datetime'].apply(lambda x: timestamp_to_datetime(x))
 
     df_expanded.insert(0, 'year', df_expanded['datetime'].dt.year)
     df_expanded.insert(1, 'month', df_expanded['datetime'].dt.month)
